@@ -1,6 +1,14 @@
+"use client"
 import React from "react";
+import { useState, useEffect } from "react";
 
 const Page = () => {
+  const [userDetails, setUserDetails] = useState({
+    first_name: "",
+    email: "",
+    password: "",
+  })
+  const [isLoading, setIsLoading] = useState(false);
   return (
     <div className=" w-full flex justify-center mt-10">
       <div className="bg-transparent rounded-lg p-6 w-full max-w-sm">

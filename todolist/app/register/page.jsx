@@ -1,7 +1,9 @@
 "use client";
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
+import Loader from "@/components/Loader";
 
 const Page = () => {
   const [userDetails, setUserDetails] = useState({
@@ -11,33 +13,51 @@ const Page = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
+  const router = useRouter();
 
   const handleUserInput = (value, label) => {
-    try {
-      setUserDetails((prevValue) => {
-        return {
-          ...prevValue,
-          [label]: value,
-        };
-      });
-    } catch (error) {
-      console.error("Error in user form input:", error);
-    }
+    setUserDetails((prevValue) => ({
+      ...prevValue,
+      [label]: value,
+    }));
   };
 
+  //Registration logic
   const registerUser = async (event) => {
+    event.preventDefault();
+    setIsLoading(true);
     try {
-      event.preventDefault();
-      console.log(userDetails, "userDetails");
       const result = await axios.post("/api/register", userDetails);
-      console.log(result, "result");
+      const { status } = result;
+      const { message, email, first_name, uid, isExists } = result.data.data;
+      setIsLoading(false);
+      if (status === 200 && !isExists) {
+        Swal.fire({
+          title: message,
+          icon: !isExists ? "success" : "error",
+        });
+      } else {
+        Swal.fire({
+          title: "Registration failed",
+          text: message,
+          icon: "error",
+        });
+      }
+      !isExists && router.push("/");
     } catch (error) {
+      setIsLoading(false);
       console.error("Error while registering user in UI:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Something went wrong. Please try again.",
+        icon: "error",
+      });
     }
   };
 
   return (
     <>
+      {isLoading && <Loader />}
       <div className="flex items-center justify-center mt-10 bg-gray-100">
         <div className="bg-transparent rounded-lg p-6 w-full max-w-sm">
           <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
@@ -56,9 +76,7 @@ const Page = () => {
                 type="text"
                 id="firstname"
                 name="firstname"
-                onChange={(e) => {
-                  handleUserInput(e.target.value, "first_name");
-                }}
+                onChange={(e) => handleUserInput(e.target.value, "first_name")}
                 placeholder="Enter your first name"
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
@@ -76,9 +94,7 @@ const Page = () => {
                 type="email"
                 id="email"
                 name="email"
-                onChange={(e) => {
-                  handleUserInput(e.target.value, "email");
-                }}
+                onChange={(e) => handleUserInput(e.target.value, "email")}
                 placeholder="Enter your email"
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
@@ -95,10 +111,8 @@ const Page = () => {
               <input
                 type="password"
                 id="password"
-                onChange={(e) => {
-                  handleUserInput(e.target.value, "password");
-                }}
                 name="password"
+                onChange={(e) => handleUserInput(e.target.value, "password")}
                 placeholder="Enter your password"
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
@@ -116,9 +130,7 @@ const Page = () => {
                 type="password"
                 id="confirm-password"
                 name="confirm-password"
-                onChange={(e) => {
-                  setConfirmPassword(e.target.value);
-                }}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm your password"
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
@@ -127,7 +139,10 @@ const Page = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition"
+              className={`w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition ${
+                isLoading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={isLoading}
             >
               Register
             </button>

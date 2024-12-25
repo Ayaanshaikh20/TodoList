@@ -1,5 +1,5 @@
-import TodoList from "@/components/TodoList";
+import Home from "@/components/Home";
 
-export default function Home() {
-  return <TodoList />;
+export default function Page() {
+  return <Home />;
 }

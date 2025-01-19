@@ -21,54 +21,32 @@ import LoginModal from "./LoginModal";
 import logo from "../app/assets/Todolist_logo.svg";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
-import { Avatar } from "@material-tailwind/react";
 import toast from "react-hot-toast";
-import {
-  Cog6ToothIcon,
-  InboxArrowDownIcon,
-  LifebuoyIcon,
-  PowerIcon,
-  UserCircleIcon,
-} from "@heroicons/react/24/solid";
-import {
-  Menu,
-  MenuHandler,
-  MenuItem,
-  MenuList,
-} from "@material-tailwind/react";
 import ProfileDropdown from "./ProfileDropdown";
-
-const profileMenuItems = [
-  {
-    label: "My Profile",
-    icon: UserCircleIcon,
-  },
-  {
-    label: "Edit Profile",
-    icon: Cog6ToothIcon,
-  },
-  {
-    label: "Inbox",
-    icon: InboxArrowDownIcon,
-  },
-  {
-    label: "Help",
-    icon: LifebuoyIcon,
-  },
-  {
-    label: "Sign Out",
-    icon: PowerIcon,
-  },
-];
 
 const NavbarComponent = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isOpenLoginModal, setIsOpenLoginModal] = useState(false);
   const [isOpenRegisterModal, setIsOpenRegisterModal] = useState(false);
-  const drawerWidth = 240;
+  const [isScrolled, setIsScrolled] = useState(false);
   const { data: session } = useSession();
   const [user, setUser] = useState(null);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 0) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -79,45 +57,33 @@ const NavbarComponent = () => {
     }
   }, []);
 
-  const openLoginModal = () => {
-    setIsOpenLoginModal(true);
-  };
+  const openLoginModal = () => setIsOpenLoginModal(true);
+  const closeLoginModal = () => setIsOpenLoginModal(false);
+  const openRegisterModal = () => setIsOpenRegisterModal(true);
+  const closeRegisterModal = () => setIsOpenRegisterModal(false);
 
-  const closeLoginModal = () => {
-    setIsOpenLoginModal(false);
-  };
-
-  const openRegisterModal = () => {
-    setIsOpenRegisterModal(true);
-  };
-
-  const closeRegisterModal = () => {
-    setIsOpenRegisterModal(false);
-  };
-
-  const toggleDrawer = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  const toggleDrawer = () => setIsMenuOpen(!isMenuOpen);
 
   const handleSignOut = (event) => {
     event.preventDefault();
     localStorage.removeItem("user");
-    setUser({});
+    setUser(null);
     toast.success("User logged out successfully");
     window.location.reload();
   };
-
-  const closeMenu = () => setIsProfileOpen(false);
 
   return (
     <>
       {/* App Bar */}
       <AppBar
-        className="shadow-lg py-2 md:py-0"
+        className={`py-2 shadow-none md:py-0 transition-all duration-300 ${
+          isScrolled ? "bg-white" : "bg-transparent z-50"
+        }`}
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
-          backgroundColor: "#ffffff",
-          color: "#000000",
+          color: `${isScrolled ? "#000000" : ""}`,
+          backgroundColor: "transparent",
+          boxShadow: "none",
         }}
       >
         <Toolbar>
@@ -125,13 +91,14 @@ const NavbarComponent = () => {
           <IconButton
             size="large"
             edge="start"
-            className=" text-black"
+            className="text-black"
             color="inherit"
             aria-label="menu"
             onClick={toggleDrawer}
           >
             <MenuIcon />
           </IconButton>
+
           {/* Title */}
           <Typography
             variant="h6"
@@ -139,17 +106,21 @@ const NavbarComponent = () => {
             sx={{ flexGrow: 1 }}
             className="text-black text-sm sm:text-xl font-bold tracking-wide"
           >
-            <Image src={logo} className="w-44" alt="logo" />
+            <Image
+              src={logo}
+              className="w-24 sm:w-32 md:w-40 lg:w-44"
+              alt="logo"
+            />
           </Typography>
 
           {/* Action Buttons */}
           {!session?.user && !user ? (
-            <>
+            <div className="hidden sm:flex gap-2">
               <Button
                 color="inherit"
                 size="sm"
                 variant="outlined"
-                className="text-black border-black"
+                className="text-black border-black z-50"
                 onClick={openLoginModal}
               >
                 Login
@@ -163,14 +134,10 @@ const NavbarComponent = () => {
               >
                 Register
               </Button>
-              {/* <span>{JSON.stringify(user)}</span> */}
-            </>
+            </div>
           ) : session?.user ? (
-            <>
-              <div className=" flex gap-2 items-center">
-                {/* <span className=" text-sm">Welcome, {session?.user?.name}</span> */}
-                <ProfileDropdown user={session?.user} />
-              </div>
+            <div className="flex gap-2 items-center">
+              <ProfileDropdown user={session?.user} />
               <Button
                 color="inherit"
                 size="sm"
@@ -180,22 +147,20 @@ const NavbarComponent = () => {
               >
                 Logout
               </Button>
-            </>
-          ) : user ? (
-            <>
+            </div>
+          ) : (
+            <div className="flex gap-2 items-center">
               <ProfileDropdown normalUser={user} isNormalUser={true} />
               <Button
                 color="inherit"
                 size="sm"
                 variant="gradient"
                 className="ml-3"
-                onClick={(e) => handleSignOut(e)}
+                onClick={handleSignOut}
               >
                 Logout
               </Button>
-            </>
-          ) : (
-            ""
+            </div>
           )}
         </Toolbar>
       </AppBar>
@@ -205,12 +170,12 @@ const NavbarComponent = () => {
         open={isMenuOpen}
         onClose={toggleDrawer}
         sx={{
-          width: drawerWidth,
+          width: 240,
           [`& .MuiDrawer-paper`]: {
-            width: drawerWidth,
+            width: 240,
             boxSizing: "border-box",
             background: "#000000",
-            color: "#333",
+            color: "#ffffff",
           },
         }}
       >
@@ -219,7 +184,7 @@ const NavbarComponent = () => {
           {/* Main Menu */}
           <List>
             {["Home", "About us"].map((text, index) => (
-              <ListItem key={text} disablePadding className="">
+              <ListItem key={text} disablePadding>
                 <ListItemButton>
                   <ListItemIcon>
                     {index % 2 === 0 ? (
@@ -228,40 +193,56 @@ const NavbarComponent = () => {
                       <MailIcon className="text-white" />
                     )}
                   </ListItemIcon>
-                  <ListItemText primary={text} className=" text-white" />
+                  <ListItemText primary={text} className="text-white" />
                 </ListItemButton>
               </ListItem>
             ))}
           </List>
           <Divider />
-          {/* Secondary Menu */}
-          <List>
-            {["Logout"].map((text, index) => (
-              <ListItem key={text} disablePadding>
-                <ListItemButton>
-                  <ListItemIcon>
-                    {index % 2 === 0 ? (
-                      <InboxIcon className="text-red-600" />
-                    ) : (
-                      <MailIcon className="text-red-600" />
-                    )}
-                  </ListItemIcon>
-                  <ListItemText primary={text} className=" text-white" />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
+          {/* Login and Register Buttons for small screens */}
+          <div className="sm:hidden flex flex-col gap-2 p-3">
+            {!session?.user && !user ? (
+              <>
+                <Button
+                  color="inherit"
+                  size="sm"
+                  variant="outlined"
+                  className="text-white border-white"
+                  onClick={openLoginModal}
+                >
+                  Login
+                </Button>
+                <Button
+                  color="inherit"
+                  size="sm"
+                  variant="gradient"
+                  className="mt-2"
+                  onClick={openRegisterModal}
+                >
+                  Register
+                </Button>
+              </>
+            ) : (
+              <Button
+                color="inherit"
+                size="sm"
+                variant="gradient"
+                className="text-red-600"
+                onClick={handleSignOut}
+              >
+                Logout
+              </Button>
+            )}
+          </div>
         </Box>
       </Drawer>
 
-      {/* Register Modal */}
+      {/* Modals */}
       <RegisterModal
         open={isOpenRegisterModal}
         handleOpen={openRegisterModal}
         handleClose={closeRegisterModal}
       />
-
-      {/* Login Modal */}
       <LoginModal
         open={isOpenLoginModal}
         handleOpen={openLoginModal}

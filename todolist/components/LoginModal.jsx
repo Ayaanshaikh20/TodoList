@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import axios from "axios";
@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@material-tailwind/react";
 import logo from "../app/assets/Todolist_logo.svg";
 import Image from "next/image";
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import toast from "react-hot-toast";
 
 const LoginModal = ({ open, handleClose }) => {
@@ -38,7 +38,7 @@ const LoginModal = ({ open, handleClose }) => {
         handleClose();
         localStorage.setItem("user", JSON.stringify(data));
         toast.success(message);
-        router.push('/dashboard')
+        router.push("/dashboard");
         window.location.reload();
       } else {
         toast.error(error || "Login failed. Please try again.");
@@ -81,7 +81,7 @@ const LoginModal = ({ open, handleClose }) => {
           <h2 className="text-2xl font-bold text-gray-600 flex justify-start text-center">
             User Login
           </h2>
-          <Image src={logo} className="w-32" priority alt="logo" />
+          {/* <Image src={logo} className="w-32" priority alt="logo" /> */}
         </div>
         <form onSubmit={loginUser}>
           <div className="mb-4">
@@ -123,6 +123,12 @@ const LoginModal = ({ open, handleClose }) => {
               className="h-6 w-6"
             />
             Continue with Google
+          </Button>
+          <span className=" mt-2 mb-2 flex justify-center items-center">
+            ---OR---
+          </span>
+          <Button type="submit"  variant="gradient" className=" w-full">
+            Login as guest
           </Button>
         </form>
       </Box>

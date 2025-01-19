@@ -14,6 +14,10 @@ module.exports = withMT({
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      screens: {
+        "1440px": "1440px", // Custom screen size of 1440px
+        "2560px": "2560px" // Custom screen size of 2560px
+      },
     },
   },
   plugins: [],

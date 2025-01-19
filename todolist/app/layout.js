@@ -24,11 +24,11 @@ export default async function RootLayout({ children }) {
     <html lang="en">
       <body className={`${outfit.className} antialiased`}>
         <AuthProvider session={session}>
-        <section className="w-full min-h-screen flex justify-center">
+        <section className="w-full min-h-screen h-full flex justify-center">
           <div className="">
             <Navbar />
           </div>
-          <div className="mt-[5rem] p-4">{children}</div>
+          <div className="mt-[5rem]">{children}</div>
         </section>
         <Toaster position="top-right" reverseOrder={false} />
         </AuthProvider>

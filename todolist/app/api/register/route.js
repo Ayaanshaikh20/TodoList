@@ -11,13 +11,12 @@ export async function POST(request) {
     const hashedPassword = await bcrypt.hash(password, 5);
     const userExistsCheck = `Select email from dbo.userRegister where email='${email}'`;
     let userEmail = await sql.query(userExistsCheck);
-    console.log(userEmail, "userEmail");
     if (userEmail?.recordset[0]?.email) {
       return NextResponse.json({
-        data: {
-          message: `User already exists with this email`,
-          isExists: true
-        },
+        error: "User already exists with this email",
+        status: 409,
+        message: "Failure",
+        isExists: true,
       });
     }
     const InsertQuery = `Insert into dbo.userRegister (first_name, email, password) values('${first_name}', '${email}', '${hashedPassword}')`;
@@ -28,17 +27,19 @@ export async function POST(request) {
     const { uid } = recordSet;
     return NextResponse.json({
       data: {
-        message: `User registered successfully`,
         email: email,
         first_name: first_name,
         uid: uid,
       },
+      status: 200,
+      message: `User registered successfully`,
     });
   } catch (error) {
     console.error("Error while registering user:", error);
-    return NextResponse.json(
-      { error: "Error while registering user" },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      error: "Something went wrong. Please try again",
+      status: 500,
+      message: 'Failure'
+    });
   }
 }

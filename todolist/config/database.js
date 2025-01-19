@@ -6,12 +6,12 @@ const connectionString = {
   pool: {
     max: 10,
     min: 0,
-    idleTimeoutMillis: 30000
+    idleTimeoutMillis: 30000,
   },
   options: {
-    encrypt: false,
-    trustServerCertificate: true
-  }
+    encrypt: process.env.NODE_ENV === "production", // true for production
+    trustServerCertificate: process.env.NODE_ENV !== "production", // false for production
+  },
 };
 
 export default connectionString;

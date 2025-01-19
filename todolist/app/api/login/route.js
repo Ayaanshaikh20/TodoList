@@ -7,6 +7,7 @@ export async function POST(request) {
   try {
     await dbConnect();
     const body = await request.json();
+    console.log("Connected successfully to the database");
     const { email, password } = body;
     const userExistsQuery = `SELECT * FROM dbo.userRegister WHERE email='${email}'`;
     const userExistsResponse = await sql.query(userExistsQuery);
@@ -15,7 +16,7 @@ export async function POST(request) {
         error: "User does not exist with this email",
         isExists: false,
         status: 404,
-        message: 'Failure'
+        message: "Failure",
       });
     }
 
@@ -26,7 +27,7 @@ export async function POST(request) {
         error: "Invalid password",
         isPasswordValid: false,
         status: 401,
-        message: 'Failure'
+        message: "Failure",
       });
     }
 

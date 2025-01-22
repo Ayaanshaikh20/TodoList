@@ -76,7 +76,7 @@ const NavbarComponent = () => {
     <>
       {/* App Bar */}
       <AppBar
-        className={`py-2 shadow-none md:py-0 transition-all duration-300 ${
+        className={` shadow-none md:py-0 transition-all duration-300 ${
           isScrolled ? "bg-white" : "bg-transparent z-50"
         }`}
         sx={{

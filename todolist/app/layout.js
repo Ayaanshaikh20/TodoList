@@ -28,7 +28,7 @@ export default async function RootLayout({ children }) {
           <div className="">
             <Navbar />
           </div>
-          <div className="mt-[5rem]">{children}</div>
+          <div className="mt-[5rem] w-full">{children}</div>
         </section>
         <Toaster position="top-right" reverseOrder={false} />
         </AuthProvider>

@@ -63,7 +63,7 @@ const ParticlesComponent = (props) => {
             default: "bounce",
           },
           random: true,
-          speed: 2,
+          speed: 4,
           straight: false,
         },
         number: {
@@ -71,13 +71,13 @@ const ParticlesComponent = (props) => {
             enable: true,
             value_area: 150, // Increase this value for denser particles
           },
-          value: 50, // Increase the total number of particles
+          value: 150, // Increase the total number of particles
         },
         opacity: {
           value: 1.0,
         },
         shape: {
-          type: "square",
+          type: "circle",
         },
         size: {
           value: { min: 1, max: 3 },

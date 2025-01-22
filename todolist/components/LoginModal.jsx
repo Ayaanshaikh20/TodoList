@@ -32,7 +32,6 @@ const LoginModal = ({ open, handleClose }) => {
     try {
       const result = await axios.post("/api/login", userDetails);
       const { message, status, error, data } = result?.data;
-      console.log(result, 'result')
       setIsLoading(false);
       if (status === 200) {
         handleClose();

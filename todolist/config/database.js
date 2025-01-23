@@ -9,8 +9,8 @@ const connectionString = {
     idleTimeoutMillis: 30000,
   },
   options: {
-    encrypt: process.env.NODE_ENV === "production", // true for production
-    trustServerCertificate: process.env.NODE_ENV !== "production", // false for production
+    encrypt: false,
+    trustServerCertificate: true
   },
 };
 

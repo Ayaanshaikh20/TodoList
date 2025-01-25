@@ -4,7 +4,8 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "react-hot-toast";
 import { auth } from "@/auth";
-import { AuthProvider } from "@/components/AuthProvider";
+import { AuthProvider } from "@/shared/AuthProvider";
+import ContextProvider from "@/shared/ContextProvider";
 
 // Import Outfit font
 const outfit = Outfit({
@@ -23,15 +24,17 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${outfit.className} antialiased`}>
-        <AuthProvider session={session}>
-        <section className="w-full min-h-screen h-full flex justify-center">
-          <div className="">
-            <Navbar />
-          </div>
-          <div className="mt-[5rem] w-full">{children}</div>
-        </section>
-        <Toaster position="top-right" reverseOrder={false} />
-        </AuthProvider>
+        <ContextProvider>
+          <AuthProvider session={session}>
+            <section className="w-full min-h-screen h-full flex justify-center">
+              <div className="">
+                <Navbar />
+              </div>
+              <div className="mt-[5rem] w-full">{children}</div>
+            </section>
+            <Toaster position="top-right" reverseOrder={false} />
+          </AuthProvider>
+        </ContextProvider>
       </body>
     </html>
   );

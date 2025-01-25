@@ -1,21 +1,21 @@
 "use client";
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import axios from "axios";
 import Loader from "@/components/Loader";
 import { useRouter } from "next/navigation";
 import { Button } from "@material-tailwind/react";
-import logo from "../app/assets/Todolist_logo.svg";
-import Image from "next/image";
 import { signIn } from "next-auth/react";
 import toast from "react-hot-toast";
+import { useOverAllContext } from "../shared/ContextProvider";
 
 const LoginModal = ({ open, handleClose }) => {
   const [userDetails, setUserDetails] = useState({
     email: "",
     password: "",
   });
+  let { user, setUser } = useOverAllContext();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -35,10 +35,10 @@ const LoginModal = ({ open, handleClose }) => {
       setIsLoading(false);
       if (status === 200) {
         handleClose();
-        localStorage.setItem("user", JSON.stringify(data));
+        let userDetails = await fetchUserDetails(data.uid);
+        setUser(userDetails);
         toast.success(message);
         router.push("/dashboard");
-        window.location.reload();
       } else {
         toast.error(error || "Login failed. Please try again.");
       }
@@ -46,6 +46,19 @@ const LoginModal = ({ open, handleClose }) => {
       setIsLoading(false);
       console.error("Error while logging in user:", error);
       toast.error("Something went wrong. Please try again.");
+    }
+  };
+
+  const fetchUserDetails = async (uid) => {
+    try {
+      let requestPayload = {
+        uid: uid,
+      };
+      let result = await axios.post("/api/user-details", requestPayload);
+      const { data } = result.data;
+      return data;
+    } catch (error) {
+      console.error("Failed to fetch user details in frontend:", error);
     }
   };
 
@@ -126,7 +139,7 @@ const LoginModal = ({ open, handleClose }) => {
           <span className=" mt-2 mb-2 flex justify-center items-center">
             ---OR---
           </span>
-          <Button type="submit"  variant="gradient" className=" w-full">
+          <Button type="submit" variant="gradient" className=" w-full">
             Login as guest
           </Button>
         </form>

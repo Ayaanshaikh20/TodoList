@@ -37,8 +37,9 @@ const RegisterModal = ({ open, handleClose, handleOpen }) => {
         handleClose();
         localStorage.setItem("user", JSON.stringify(data));
         toast.success(message);
+
+        // Redirect to the dashboard
         router.push("/dashboard");
-        window.location.reload();
       } else if (status === 409) {
         toast.error(error);
       } else {

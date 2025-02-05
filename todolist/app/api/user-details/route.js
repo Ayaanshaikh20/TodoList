@@ -6,15 +6,14 @@ export async function POST(request) {
   try {
     await dbConnect();
     const body = await request.json();
-    const { uid } = body;
-    const fetchQuery = `Select * from dbo.userRegister where uid='${uid}'`;
+    const { userId } = body;
+    const fetchQuery = `Select * from dbo.userRegister where userId='${userId}'`;
     const fetchResponse = await sql.query(fetchQuery);
     const recordSet = fetchResponse.recordset[0];
-    console.log(recordSet, "recordSet");
     const { first_name, email } = recordSet;
     return NextResponse.json({
       data: {
-        uid: uid,
+        userId: userId,
         first_name,
         email,
       },

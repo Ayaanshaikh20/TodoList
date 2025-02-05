@@ -2,6 +2,7 @@ import dbConnect from "@/config/dbconnect";
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import sql from "mssql";
+import { v4 as uuidv4 } from "uuid";
 
 export async function POST(request) {
   try {
@@ -19,17 +20,19 @@ export async function POST(request) {
         isExists: true,
       });
     }
-    const InsertQuery = `Insert into dbo.userRegister (first_name, email, password) values('${first_name}', '${email}', '${hashedPassword}')`;
+    let userid = "";
+    userid = uuidv4();
+    const InsertQuery = `Insert into dbo.userRegister (userId, first_name, email, password) values('${userid}', '${first_name}', '${email}', '${hashedPassword}')`;
     await sql.query(InsertQuery).then("user added successfully");
     const fetchQuery = `Select * from dbo.userRegister where email='${email}'`;
     const fetchResponse = await sql.query(fetchQuery);
     const recordSet = fetchResponse.recordset[0];
-    const { uid } = recordSet;
+    const { userId } = recordSet;
     return NextResponse.json({
       data: {
         email: email,
         first_name: first_name,
-        uid: uid,
+        userId: userId,
       },
       status: 200,
       message: `User registered successfully`,
@@ -38,8 +41,9 @@ export async function POST(request) {
     console.error("Error while registering user:", error);
     return NextResponse.json({
       error: "Something went wrong. Please try again",
+      errorMessage: error,
       status: 500,
-      message: 'Failure'
+      message: "Failure",
     });
   }
 }

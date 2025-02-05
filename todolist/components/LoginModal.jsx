@@ -35,7 +35,7 @@ const LoginModal = ({ open, handleClose }) => {
       setIsLoading(false);
       if (status === 200) {
         handleClose();
-        let userDetails = await fetchUserDetails(data.uid);
+        let userDetails = await fetchUserDetails(data.userId);
         setUser(userDetails);
         toast.success(message);
         router.push("/dashboard");
@@ -49,10 +49,10 @@ const LoginModal = ({ open, handleClose }) => {
     }
   };
 
-  const fetchUserDetails = async (uid) => {
+  const fetchUserDetails = async (userId) => {
     try {
       let requestPayload = {
-        uid: uid,
+        userId: userId,
       };
       let result = await axios.post("/api/user-details", requestPayload);
       const { data } = result.data;

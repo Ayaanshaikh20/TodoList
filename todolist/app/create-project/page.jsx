@@ -16,7 +16,6 @@ const Page = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Project created:", project);
     // Add project creation logic here
   };
 

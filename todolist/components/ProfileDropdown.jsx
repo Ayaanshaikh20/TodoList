@@ -41,9 +41,8 @@ const profileMenuItems = [
 //   },
 ];
 
-const ProfileDropdown = ({ user, isNormalUser, normalUser }) => {
+const ProfileDropdown = ({ user, isNormalUser }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   const closeMenu = () => setIsMenuOpen(false);
 
   return (
@@ -63,7 +62,7 @@ const ProfileDropdown = ({ user, isNormalUser, normalUser }) => {
             />
           ) : (
             <Avatar
-              src={user?.image}
+              src={user.image}
               className="border-4 border-blue-gray-900"
               variant="circular"
               alt="User Google Profile Image"

@@ -22,6 +22,24 @@ body {
   height: 100%;
 }
 
-.css-1jpc804-MuiDivider-root {
-  border-bottom-width: 0
+.task-card:active {
+  opacity: 1;
+  border: 1px solid #111;
 }
+
+.drop_area {
+  width: 100%;
+  border: none;
+  border: 2px dashed #1a1a1a; /* Dark color for the line, can use #000000 or #003366 for dark blue */
+  opacity: 1;
+  padding-bottom: 2px;
+  transition: all 0.2s ease-in-out;
+}
+
+.hide_drop {
+  opacity: 0;
+}
+
+/* .css-1jpc804-MuiDivider-root {
+  border-bottom-width: 0
+} */

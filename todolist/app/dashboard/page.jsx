@@ -1,11 +1,11 @@
 "use client";
 import ProtectedRoute from "@/shared/ProtectedRoute";
-import React, { useState } from "react";
+import React from "react";
 
 const Page = () => {
   return (
     <ProtectedRoute>
-      <div className="flex justify-center">
+      <div className="flex ">
         <span>Dashboard</span>
       </div>
     </ProtectedRoute>

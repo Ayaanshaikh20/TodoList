@@ -36,7 +36,7 @@ export async function POST(request) {
         email: user.email,
         first_name: user.first_name,
         isPasswordValid: true,
-        uid: user.uid,
+        userId: user.userId,
       },
       status: 200,
       message: "Login successful",

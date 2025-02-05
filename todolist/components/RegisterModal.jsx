@@ -7,6 +7,7 @@ import Loader from "@/components/Loader";
 import { useRouter } from "next/navigation";
 import { Button } from "@material-tailwind/react";
 import toast, { Toaster } from "react-hot-toast";
+import { useOverAllContext } from "../shared/ContextProvider";
 
 const RegisterModal = ({ open, handleClose, handleOpen }) => {
   const [userDetails, setUserDetails] = useState({
@@ -17,6 +18,7 @@ const RegisterModal = ({ open, handleClose, handleOpen }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
+  const { user, setUser } = useOverAllContext();
 
   const handleUserInput = (value, label) => {
     setUserDetails((prev) => ({
@@ -35,7 +37,7 @@ const RegisterModal = ({ open, handleClose, handleOpen }) => {
 
       if (status === 200) {
         handleClose();
-        localStorage.setItem("user", JSON.stringify(data));
+        setUser(data);
         toast.success(message);
 
         // Redirect to the dashboard
@@ -50,7 +52,7 @@ const RegisterModal = ({ open, handleClose, handleOpen }) => {
       setIsLoading(false);
       console.error("Error while registering user in UI:", error);
       handleClose();
-      toast.error("Something went wrong. Please try again.");
+      toast.error(`Something went wrong. Please try again.`);
     }
   };
 

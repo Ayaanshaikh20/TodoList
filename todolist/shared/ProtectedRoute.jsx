@@ -11,7 +11,6 @@ const ProtectedRoute = ({ children }) => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser && !session?.user) {
       router.push("/");
-      console.log('getting pushed outside')
     }
   }, []);
   return (

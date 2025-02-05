@@ -37,7 +37,7 @@ import {
 import Drawer from "@mui/material/Drawer";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import Link from "next/link";
-import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
+import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
 
 const drawerWidth = 240;
 
@@ -108,11 +108,6 @@ const NavbarComponent = () => {
   const pathname = usePathname();
   const theme = useTheme();
 
-  useEffect(() => {
-    console.log(user, "user");
-    console.log(pathname, "pathname");
-  }, [user]);
-
   const openLoginModal = () => setIsOpenLoginModal(true);
   const closeLoginModal = () => setIsOpenLoginModal(false);
   const openRegisterModal = () => setIsOpenRegisterModal(true);
@@ -132,19 +127,23 @@ const NavbarComponent = () => {
 
   const menuItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
-    { text: "Todolist", icon: <FormatListNumberedIcon/>, path: "/todolist" },
+    { text: "Todolist", icon: <FormatListNumberedIcon />, path: "/todolist" },
     { text: "Create Project", icon: <AddTaskIcon />, path: "/create-project" },
-    { text: "Manage Projects", icon: <ManageTasksIcon />, path: "/manage-projects" },
+    {
+      text: "Manage Projects",
+      icon: <ManageTasksIcon />,
+      path: "/manage-projects",
+    },
     { text: "Community", icon: <CommunityIcon />, path: "/community" },
   ];
 
   return (
     <>
       {/* App Bar */}
-      <div className=" flex flex-col w-full">
-        <div>
+      <div className="grid grid-cols-[auto,1fr] grid-rows-[auto,1fr] min-h-screen">
+        <div className="col-span-2 row-start-1 z-50">
           <AppBar
-            className={` shadow-none md:py-0 transition-all duration-300 bg-white`}
+            className={` shadow-none md:py-0 transition-all border-b-2 border-gray-300 duration-300 bg-white`}
             sx={{
               zIndex: (theme) => theme.zIndex.drawer + 1,
               color: `${"#000000"}`,
@@ -216,7 +215,14 @@ const NavbarComponent = () => {
                 </div>
               ) : session?.user ? (
                 <div className="flex gap-2 items-center">
-                  <ProfileDropdown user={session?.user} />
+                  {pathname == "/" && (
+                    <Link href={"/dashboard"}>
+                      <Button variant="text" size="sm" className=" mr-2">
+                        Dashboard
+                      </Button>
+                    </Link>
+                  )}
+                  <ProfileDropdown user={session?.user} isNormalUser={false} />
                   <Button
                     color="inherit"
                     size="sm"
@@ -229,6 +235,13 @@ const NavbarComponent = () => {
                 </div>
               ) : (
                 <div className="flex gap-2 items-center">
+                  {pathname == "/" && (
+                    <Link href={"/dashboard"}>
+                      <Button variant="text" size="sm" className=" mr-2">
+                        Dashboard
+                      </Button>
+                    </Link>
+                  )}
                   <ProfileDropdown normalUser={user} isNormalUser={true} />
                   <Button
                     color="inherit"
@@ -245,7 +258,7 @@ const NavbarComponent = () => {
           </AppBar>
         </div>
         {["/dashboard", "/create-project", "/todolist"].includes(pathname) && (
-          <div>
+          <div className="row-start-2 col-start-1 z-40">
             <DashboardDrawer
               variant="permanent"
               className="border-none"
@@ -253,7 +266,7 @@ const NavbarComponent = () => {
               sx={{
                 border: "none",
                 boxShadow: "none",
-                margin: 0
+                margin: 0,
               }}
             >
               <DrawerHeader>
@@ -274,6 +287,7 @@ const NavbarComponent = () => {
                 {menuItems.map((item) => (
                   <ListItem
                     key={item.text}
+                    title={item.text}
                     disablePadding
                     sx={{ display: "block" }}
                   >

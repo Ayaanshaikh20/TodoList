@@ -34,7 +34,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.5.1",
-    "uuid": "^11.0.5"
+    "uuid": "^11.0.5",
+    "vercel": "^41.0.2"
   },
   "devDependencies": {
     "postcss": "^8",

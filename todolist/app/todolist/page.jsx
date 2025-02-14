@@ -15,7 +15,7 @@ import {
   Select,
   Option,
 } from "@material-tailwind/react";
-import React, { useState, useMemo, useEffect, memo } from "react";
+import React, { useState, useMemo, useEffect, memo, useContext } from "react";
 import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
 import { AgGridReact } from "ag-grid-react";
 import {
@@ -29,13 +29,15 @@ import {
   TextEditorModule,
   RowStyleModule,
 } from "ag-grid-community";
+import { Toaster, toast } from "react-hot-toast";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import { IconButton } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CircleIcon from "@mui/icons-material/Circle";
 import axios from "axios";
-import { useOverAllContext } from "../../shared/ContextProvider";
+import { ContextProvider, OverAllContext } from "../../shared/ContextProvider";
+import moment from "moment";
 
 ModuleRegistry.registerModules([
   TextFilterModule,
@@ -51,7 +53,7 @@ ModuleRegistry.registerModules([
 const Page = () => {
   const [openActionMenu, setOpenActionMenu] = useState(false);
   const [openAddTaskModal, setOpenAddTaskModal] = useState(false);
-  const { user, setUser } = useOverAllContext();
+  const { user } = useContext(OverAllContext);
 
   const [taskDetails, setTaskDetails] = useState({
     taskTitle: "",
@@ -61,10 +63,6 @@ const Page = () => {
     priority: "",
     status: "",
   });
-
-  useEffect(() => {
-    console.log(taskDetails, "user");
-  }, []);
 
   useEffect(() => {
     getTasksList();
@@ -105,7 +103,6 @@ const Page = () => {
     try {
       if (user?.userId) {
         const result = await axios.get(`/api/get-tasks?userId=${user.userId}`);
-        console.log(result, "result in ui");
         const { status, message } = result.data;
         const { tasklist } = result.data.data;
         if (status == 200 && message == "Tasks retrieved successfully") {
@@ -119,7 +116,6 @@ const Page = () => {
 
   const handleSubmit = async () => {
     // Handle form submission here
-    console.log(taskDetails, "taskDetails");
     try {
       let data = {
         taskTitle: taskDetails.taskTitle,
@@ -131,50 +127,31 @@ const Page = () => {
         userId: user?.userId,
       };
       let result = await axios.post("/api/add-task", data);
-
-      if (result.data.status == 200) {
+      const { message, status } = result.data;
+      if (status == 200) {
         await getTasksList();
+        toast.success(message);
       }
     } catch (error) {
       console.error(`Error while adding task in ui ${error}`);
     }
 
-    handleAddTaskModalOpen(false); // Close the modal after submission
+    handleAddTaskModalOpen(false);
   };
 
-  /* Child Components */
-  const ActionCellRenderer = (params) => {
-    return (
-      <>
-        <Menu placement="bottom-start">
-          <MenuHandler>
-            <IconButton title="Action">
-              <MoreVertIcon className=" flex items-center" />
-            </IconButton>
-          </MenuHandler>
-          <MenuList>
-            <MenuItem>Menu Item 1</MenuItem>
-            <MenuItem>Menu Item 2</MenuItem>
-            <MenuItem>Menu Item 3</MenuItem>
-          </MenuList>
-        </Menu>
-      </>
-    );
-  };
-
-  const ViewCellRenderer = (params) => {
-    return (
-      <IconButton
-        onClick={() => alert(`Viewing Task: ${params.data.task}`)}
-        size="small"
-        title="View"
-      >
-        <RemoveRedEyeIcon
-          fontSize="small"
-          className=" text-yellow-700 flex items-center"
-        />
-      </IconButton>
-    );
+  const deleteTask = async (taskid) => {
+    // Handle delete task here
+    try {
+      let result = await axios.delete(`/api/delete-task?taskid=${taskid}`);
+      console.log(result, "data");
+      const { message, status } = result.data;
+      if (status == 200) {
+        await getTasksList();
+        toast.success(message);
+      }
+    } catch (error) {
+      console.error(`Error while deleting task in ui ${error}`);
+    }
   };
 
   const [rows, setRows] = useState(null);
@@ -188,29 +165,39 @@ const Page = () => {
       width: 50,
       maxWidth: 50,
     },
-    {
-      field: "taskid",
-      headerName: "ID",
-      resizable: true,
-      width: 70,
-      minWidth: 100,
-      maxWidth: 100,
-    },
+    // {
+    //   field: "taskid",
+    //   headerName: "ID",
+    //   resizable: true,
+    //   width: 150,
+    //   minWidth: 150,
+    // },
     {
       field: "task_title",
       headerName: "Task",
       resizable: true,
       flex: 2,
-      minWidth: 500,
-      maxWidth: 500,
+      minWidth: 300,
     },
     {
       field: "priority",
       headerName: "Priority",
       resizable: true,
+      cellRenderer: (params) => {
+        return (
+          <span>
+            {params.value === "high" ? (
+              <span className="text-red-600">High</span>
+            ) : params.value === "medium" ? (
+              <span className="text-yellow-700 font-body">Medium</span>
+            ) : (
+              <span className="text-blue-800">Low</span>
+            )}
+          </span>
+        );
+      },
       flex: 1,
       minWidth: 100,
-      maxWidth: 200,
     },
     {
       field: "status",
@@ -219,12 +206,34 @@ const Page = () => {
       flex: 1,
       minWidth: 100,
       maxWidth: 200,
+      cellRenderer: (params) => {
+        return (
+          <span>
+            {params.value == "todo" ? (
+              <span className="text-blue-800 px-3 py-1 rounded-full text-sm bg-gray-200 font-semibold">
+                Todo
+              </span>
+            ) : params.value == "inprogress" ? (
+              <span className=" text-yellow-700 px-3 py-1 rounded-full bg-gray-200 text-sm font-semibold">
+                In-progress
+              </span>
+            ) : (
+              <span className="text-green-600 px-3 py-1 rounded-full bg-gray-200 text-sm font-semibold">
+                Completed
+              </span>
+            )}
+          </span>
+        );
+      },
     },
     {
       field: "start_date",
       headerName: "Start At",
       resizable: true,
       flex: 1,
+      cellRenderer: (params) => {
+        return <span>{moment(params.value).format("DD-MM-YYYY")}</span>;
+      },
       minWidth: 80,
       maxWidth: 200,
     },
@@ -232,7 +241,9 @@ const Page = () => {
       field: "due_date",
       headerName: "Due At",
       resizable: true,
-      // flex: 1,
+      cellRenderer: (params) => {
+        return <span>{moment(params.value).format("DD-MM-YYYY")}</span>;
+      },
       minWidth: 50,
       maxWidth: 200,
     },
@@ -246,7 +257,20 @@ const Page = () => {
       filter: false,
       sortable: false,
       pinned: "right",
-      cellRenderer: ViewCellRenderer,
+      cellRenderer: (params) => {
+        return (
+          <IconButton
+            onClick={() => alert(`Viewing Task: ${params.data.task_title}`)}
+            size="small"
+            title="View"
+          >
+            <RemoveRedEyeIcon
+              fontSize="small"
+              className=" text-yellow-700 flex items-center"
+            />
+          </IconButton>
+        );
+      },
     },
     {
       field: "action",
@@ -258,7 +282,28 @@ const Page = () => {
       filter: false,
       sortable: false,
       pinned: "right",
-      cellRenderer: ActionCellRenderer,
+      cellRenderer: (params) => {
+        return (
+          <Menu placement="bottom-start">
+            <MenuHandler>
+              <IconButton title="Action">
+                <MoreVertIcon className=" flex items-center" />
+              </IconButton>
+            </MenuHandler>
+            <MenuList>
+              <MenuItem className=" text-yellow-700">Edit</MenuItem>
+              <MenuItem
+                className=" text-red-500"
+                onClick={() => {
+                  deleteTask(params.data.taskid);
+                }}
+              >
+                Delete
+              </MenuItem>
+            </MenuList>
+          </Menu>
+        );
+      },
     },
   ]);
   const onGridReady = (params) => {
@@ -380,7 +425,7 @@ const Page = () => {
           </DialogFooter>
         </Dialog>
       }
-      <div className="bg-white mx-4 px-4 rounded-lg border border-gray-400">
+      <div className="bg-white mx-2 px-4 rounded-lg border border-gray-400">
         <div className="py-5 w-full flex justify-between">
           <span className="text-3xl text-black flex items-center">
             <PlaylistAddCheckIcon

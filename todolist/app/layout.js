@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import { Toaster } from "react-hot-toast";
 import { auth } from "@/auth";
 import { AuthProvider } from "@/shared/AuthProvider";
-import ContextProvider from "@/shared/ContextProvider";
+import { ContextProvider } from "@/shared/ContextProvider";
 
 // Import Outfit font
 const outfit = Outfit({

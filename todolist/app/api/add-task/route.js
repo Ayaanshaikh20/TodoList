@@ -7,7 +7,6 @@ export async function POST(request) {
   try {
     await dbConnect();
     const taskDetails = await request.json();
-    console.log(taskDetails, "taskDetails");
     const {
       taskTitle,
       taskDescription,

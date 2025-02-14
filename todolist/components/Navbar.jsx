@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Button } from "@material-tailwind/react";
 import Toolbar from "@mui/material/Toolbar";
 import Box from "@mui/material/Box";
@@ -23,7 +23,7 @@ import { useSession, signOut } from "next-auth/react";
 import toast from "react-hot-toast";
 import ProfileDropdown from "./ProfileDropdown";
 import { useRouter, usePathname } from "next/navigation";
-import { useOverAllContext } from "../shared/ContextProvider";
+import { ContextProvider, OverAllContext } from "../shared/ContextProvider";
 import { styled, useTheme } from "@mui/material/styles";
 import MuiDrawer from "@mui/material/Drawer";
 import CloseIcon from "@mui/icons-material/Close";
@@ -101,8 +101,8 @@ const NavbarComponent = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isOpenLoginModal, setIsOpenLoginModal] = useState(false);
   const [isOpenRegisterModal, setIsOpenRegisterModal] = useState(false);
-  let { user, setUser, isOpenDashboardSidebar, setIsOpenDashboardSidebar } =
-    useOverAllContext();
+  let { user, isOpenDashboardSidebar, setIsOpenDashboardSidebar } =
+    useContext(OverAllContext);
   const { data: session } = useSession();
   const router = useRouter();
   const pathname = usePathname();
@@ -128,13 +128,13 @@ const NavbarComponent = () => {
   const menuItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
     { text: "Todolist", icon: <FormatListNumberedIcon />, path: "/todolist" },
-    { text: "Create Project", icon: <AddTaskIcon />, path: "/create-project" },
-    {
-      text: "Manage Projects",
-      icon: <ManageTasksIcon />,
-      path: "/manage-projects",
-    },
-    { text: "Community", icon: <CommunityIcon />, path: "/community" },
+    // { text: "Create Project", icon: <AddTaskIcon />, path: "/create-project" },
+    // {
+    //   text: "Manage Projects",
+    //   icon: <ManageTasksIcon />,
+    //   path: "/manage-projects",
+    // },
+    // { text: "Community", icon: <CommunityIcon />, path: "/community" },
   ];
 
   return (

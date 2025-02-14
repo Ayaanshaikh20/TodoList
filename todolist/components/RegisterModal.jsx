@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import axios from "axios";
@@ -7,7 +7,7 @@ import Loader from "@/components/Loader";
 import { useRouter } from "next/navigation";
 import { Button } from "@material-tailwind/react";
 import toast, { Toaster } from "react-hot-toast";
-import { useOverAllContext } from "../shared/ContextProvider";
+import { ContextProvider, OverAllContext } from "../shared/ContextProvider";
 
 const RegisterModal = ({ open, handleClose, handleOpen }) => {
   const [userDetails, setUserDetails] = useState({
@@ -18,7 +18,7 @@ const RegisterModal = ({ open, handleClose, handleOpen }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
-  const { user, setUser } = useOverAllContext();
+  const { user } = useContext(OverAllContext);
 
   const handleUserInput = (value, label) => {
     setUserDetails((prev) => ({

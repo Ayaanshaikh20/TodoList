@@ -2,10 +2,6 @@
 import ProtectedRoute from "@/shared/ProtectedRoute";
 import {
   Button,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
   Dialog,
   DialogHeader,
   DialogBody,
@@ -14,9 +10,8 @@ import {
   Textarea,
   Select,
   Option,
-  Spinner,
 } from "@material-tailwind/react";
-import React, { useState, useMemo, useEffect, memo, useContext } from "react";
+import React, { useState, useMemo, useEffect, useContext } from "react";
 import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
 import { AgGridReact } from "ag-grid-react";
 import {
@@ -30,11 +25,10 @@ import {
   TextEditorModule,
   RowStyleModule,
 } from "ag-grid-community";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import { IconButton } from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CircleIcon from "@mui/icons-material/Circle";
 import axios from "axios";
 import { OverAllContext } from "../../shared/ContextProvider";
@@ -58,9 +52,11 @@ const Page = () => {
   const [isEdit, setIsEdit] = useState(false);
   const { user } = useContext(OverAllContext);
   const [isLoading, setIsLoading] = useState(false);
+  const [isView, setIsView] = useState(false);
 
   const [taskDetails, setTaskDetails] = useState({
     taskId: "",
+    userId: "",
     taskTitle: "",
     taskDescription: "",
     startDate: "",
@@ -208,6 +204,40 @@ const Page = () => {
     }
   };
 
+  const handleViewTask = (task) => {
+    console.log(task);
+    let taskDetail = {
+      taskid: task.taskid,
+      taskTitle: task.task_title,
+      taskDescription: task.task_description,
+      startDate: moment(task.start_date).format("YYYY-MM-DD"),
+      dueDate: moment(task.due_date).format("YYYY-MM-DD"),
+      priority: task.priority,
+      status: task.status,
+      userId: task.userId,
+    };
+    setTaskDetails(taskDetail);
+    setIsView(true);
+  };
+
+  const closeViewModal = () => {
+    setIsView(false);
+  };
+
+  // Priority Colors
+  const priorityColors = {
+    high: "text-red-600",
+    medium: "text-yellow-600",
+    low: "text-green-600",
+  };
+
+  // Status Colors
+  const statusColors = {
+    todo: "text-blue-600",
+    inprogress: "text-orange-600",
+    completed: "text-green-600",
+  };
+
   const [rows, setRows] = useState(null);
   const [columns, setColumns] = useState([
     {
@@ -320,7 +350,7 @@ const Page = () => {
       cellRenderer: (params) => {
         return (
           <IconButton
-            onClick={() => alert(`Viewing Task: ${params.data.task_title}`)}
+            onClick={() => handleViewTask(params.data)}
             size="small"
             title="View"
           >
@@ -396,8 +426,9 @@ const Page = () => {
           <DialogBody>
             <form className="flex flex-col gap-4">
               <Input
-                label="Task Title"
+                label={`Task Title`}
                 value={taskDetails.taskTitle}
+                required
                 onChange={(e) => handleAddTaskInput(e, "taskTitle")}
               />
               <Textarea
@@ -409,12 +440,14 @@ const Page = () => {
                 <Input
                   type="date"
                   label="Start Date"
+                  required
                   value={taskDetails.startDate}
                   onChange={(e) => handleAddTaskInput(e, "startDate")}
                 />
                 <Input
                   type="date"
                   label="Due Date"
+                  required
                   value={taskDetails.dueDate}
                   onChange={(e) => handleAddTaskInput(e, "dueDate")}
                 />
@@ -489,6 +522,78 @@ const Page = () => {
               onClick={isEdit ? editTask : handleSubmit}
             >
               <span>{isEdit ? "Edit" : "Add"}</span>
+            </Button>
+          </DialogFooter>
+        </Dialog>
+      )}
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <Dialog open={isView} onClose={closeViewModal} fullWidth maxWidth="sm">
+          {/* Header */}
+          <DialogHeader className="text-lg font-semibold">
+            Task Details
+          </DialogHeader>
+
+          {/* Body */}
+          <DialogBody>
+            <div className="space-y-4 p-2">
+              <div className="flex flex-col gap-1">
+                <span className="text-gray-500 text-sm">Title</span>
+                <p className="font-medium text-lg">{taskDetails.taskTitle}</p>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-gray-500 text-sm">Description</span>
+                <p className="text-gray-700">{taskDetails.taskDescription}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-gray-500 text-sm">Start Date</span>
+                  <p className="font-medium">{taskDetails.startDate}</p>
+                </div>
+                <div>
+                  <span className="text-gray-500 text-sm">Due Date</span>
+                  <p className="font-medium">{taskDetails.dueDate}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-2 items-center">
+                <span className="text-gray-500 text-sm">Priority</span>
+                <div
+                  className={`flex items-center ${priorityColors[taskDetails.priority]}`}
+                >
+                  <CircleIcon className="text-sm mr-1" />
+                  <span className="font-medium capitalize">
+                    {taskDetails.priority}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-2 items-center">
+                <span className="text-gray-500 text-sm">Status</span>
+                <div
+                  className={`flex items-center ${statusColors[taskDetails.status]}`}
+                >
+                  <CircleIcon className="text-sm mr-1" />
+                  <span className="font-medium capitalize">
+                    {taskDetails.status}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </DialogBody>
+
+          {/* Footer */}
+          <DialogFooter className="flex justify-end">
+            <Button
+              variant="text"
+              color="red"
+              size="small"
+              onClick={closeViewModal}
+            >
+              Close
             </Button>
           </DialogFooter>
         </Dialog>

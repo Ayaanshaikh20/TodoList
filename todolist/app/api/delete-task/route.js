@@ -7,7 +7,6 @@ export async function DELETE(request) {
     await dbConnect();
     const { searchParams } = new URL(request.url);
     const taskid = searchParams.get("taskid");
-    console.log(taskid);
     const requestDB = new sql.Request();
     requestDB.input("taskid", sql.VarChar(255), taskid);
     await requestDB.query("DELETE FROM dbo.userTasks WHERE taskid=@taskid");

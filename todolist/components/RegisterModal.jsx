@@ -18,7 +18,7 @@ const RegisterModal = ({ open, handleClose, handleOpen }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
-  const { user } = useContext(OverAllContext);
+  const { user, setUser } = useContext(OverAllContext);
 
   const handleUserInput = (value, label) => {
     setUserDetails((prev) => ({
@@ -38,6 +38,7 @@ const RegisterModal = ({ open, handleClose, handleOpen }) => {
       if (status === 200) {
         handleClose();
         setUser(data);
+        localStorage.setItem("user", JSON.stringify(data));
         toast.success(message);
 
         // Redirect to the dashboard

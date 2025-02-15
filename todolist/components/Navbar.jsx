@@ -113,10 +113,6 @@ const NavbarComponent = () => {
   const pathname = usePathname();
   const theme = useTheme();
 
-  useEffect(() => {
-    console.log(user, "user");
-  }, []);
-
   const openLoginModal = () => setIsOpenLoginModal(true);
   const closeLoginModal = () => setIsOpenLoginModal(false);
   const openRegisterModal = () => setIsOpenRegisterModal(true);
@@ -138,7 +134,7 @@ const NavbarComponent = () => {
   const menuItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
     { text: "Todolist", icon: <FormatListNumberedIcon />, path: "/todolist" },
-    // { text: "Create Project", icon: <AddTaskIcon />, path: "/create-project" },
+    { text: "Notes", icon: <AddTaskIcon />, path: "/notes" },
     // {
     //   text: "Manage Projects",
     //   icon: <ManageTasksIcon />,
@@ -267,7 +263,7 @@ const NavbarComponent = () => {
             </Toolbar>
           </AppBar>
         </div>
-        {["/dashboard", "/create-project", "/todolist"].includes(pathname) && (
+        {["/dashboard", "/notes", "/todolist"].includes(pathname) && (
           <div className="row-start-2 col-start-1 z-40">
             <DashboardDrawer
               variant="permanent"

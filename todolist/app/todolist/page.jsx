@@ -14,6 +14,7 @@ import {
   Textarea,
   Select,
   Option,
+  Spinner,
 } from "@material-tailwind/react";
 import React, { useState, useMemo, useEffect, memo, useContext } from "react";
 import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
@@ -36,8 +37,10 @@ import { IconButton } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CircleIcon from "@mui/icons-material/Circle";
 import axios from "axios";
-import { ContextProvider, OverAllContext } from "../../shared/ContextProvider";
+import { OverAllContext } from "../../shared/ContextProvider";
 import moment from "moment";
+import Loader from "@/components/Loader";
+import { RiEdit2Fill, RiDeleteBin6Fill } from "react-icons/ri";
 
 ModuleRegistry.registerModules([
   TextFilterModule,
@@ -51,11 +54,13 @@ ModuleRegistry.registerModules([
 ]);
 
 const Page = () => {
-  const [openActionMenu, setOpenActionMenu] = useState(false);
   const [openAddTaskModal, setOpenAddTaskModal] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
   const { user } = useContext(OverAllContext);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [taskDetails, setTaskDetails] = useState({
+    taskId: "",
     taskTitle: "",
     taskDescription: "",
     startDate: "",
@@ -85,10 +90,6 @@ const Page = () => {
     }
   };
 
-  const handleOpenActionMenu = () => {
-    setOpenActionMenu(!openActionMenu);
-  };
-
   const handleAddTaskInput = (event, field) => {
     setTaskDetails((prev) => {
       return {
@@ -101,6 +102,7 @@ const Page = () => {
 
   const getTasksList = async () => {
     try {
+      setIsLoading(true);
       let userDetails = JSON.parse(localStorage.getItem("user"));
       if (userDetails.userId) {
         const result = await axios.get(
@@ -112,6 +114,7 @@ const Page = () => {
           setRows(tasklist);
         }
       }
+      setIsLoading(false);
     } catch (error) {
       console.error(" Error fetching tasks:", error);
     }
@@ -119,6 +122,7 @@ const Page = () => {
 
   const handleSubmit = async () => {
     // Handle form submission here
+    setIsLoading(true);
     try {
       let data = {
         taskTitle: taskDetails.taskTitle,
@@ -138,22 +142,69 @@ const Page = () => {
     } catch (error) {
       console.error(`Error while adding task in ui ${error}`);
     }
-
     handleAddTaskModalOpen(false);
+    setIsLoading(false);
   };
 
   const deleteTask = async (taskid) => {
     // Handle delete task here
+    setIsLoading(true);
     try {
       let result = await axios.delete(`/api/delete-task?taskid=${taskid}`);
-      console.log(result, "data");
       const { message, status } = result.data;
       if (status == 200) {
         await getTasksList();
         toast.success(message);
       }
+      setIsLoading(false);
     } catch (error) {
       console.error(`Error while deleting task in ui ${error}`);
+    }
+  };
+
+  const openEditTaskModal = async (taskid) => {
+    // Handle open edit task modal here
+    try {
+      setIsEdit(true);
+      setIsLoading(true);
+      let result = await axios.get(`/api/get-task?taskid=${taskid}`);
+      const { message, status, data } = result.data;
+      const { taskDetails } = data;
+      if (status == 200) {
+        let taskDetail = {
+          taskid: taskid,
+          taskTitle: taskDetails.task_title,
+          taskDescription: taskDetails.task_description,
+          startDate: moment(taskDetails.start_date).format("YYYY-MM-DD"),
+          dueDate: moment(taskDetails.due_date).format("YYYY-MM-DD"),
+          priority: taskDetails.priority,
+          status: taskDetails.status,
+          userId: taskDetails.userId,
+        };
+        setTaskDetails(taskDetail);
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.error(`Error while getting task in ui ${error}`);
+    }
+  };
+
+  const editTask = async (taskid) => {
+    // Handle edit task here
+    try {
+      setIsLoading(true);
+      let result = await axios.put(`/api/edit-task`, taskDetails);
+      const { message, status } = result.data;
+      if (status == 200) {
+        toast.success(message);
+        await getTasksList();
+        setIsEdit(false);
+      } else {
+        toast.error(message);
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.error(`Error while editing task in ui ${error}`);
     }
   };
 
@@ -180,12 +231,14 @@ const Page = () => {
       headerName: "Task",
       resizable: true,
       flex: 2,
-      minWidth: 300,
+      minWidth: 450,
+      filter: false,
     },
     {
       field: "priority",
       headerName: "Priority",
       resizable: true,
+      filter: false,
       cellRenderer: (params) => {
         return (
           <span>
@@ -201,6 +254,7 @@ const Page = () => {
       },
       flex: 1,
       minWidth: 100,
+      maxWidth: 200,
     },
     {
       field: "status",
@@ -209,6 +263,7 @@ const Page = () => {
       flex: 1,
       minWidth: 100,
       maxWidth: 200,
+      filter: false,
       cellRenderer: (params) => {
         return (
           <span>
@@ -234,6 +289,7 @@ const Page = () => {
       headerName: "Start At",
       resizable: true,
       flex: 1,
+      filter: false,
       cellRenderer: (params) => {
         return <span>{moment(params.value).format("DD-MM-YYYY")}</span>;
       },
@@ -244,6 +300,7 @@ const Page = () => {
       field: "due_date",
       headerName: "Due At",
       resizable: true,
+      filter: false,
       cellRenderer: (params) => {
         return <span>{moment(params.value).format("DD-MM-YYYY")}</span>;
       },
@@ -280,37 +337,35 @@ const Page = () => {
       headerName: "Action",
       resizable: true,
       flex: 1,
-      minWidth: 50,
-      maxWidth: 100,
+      minWidth: 40,
+      maxWidth: 80,
       filter: false,
       sortable: false,
       pinned: "right",
       cellRenderer: (params) => {
         return (
-          <Menu placement="bottom-start">
-            <MenuHandler>
-              <IconButton title="Action">
-                <MoreVertIcon className=" flex items-center" />
-              </IconButton>
-            </MenuHandler>
-            <MenuList>
-              <MenuItem className=" text-yellow-700">Edit</MenuItem>
-              <MenuItem
-                className=" text-red-500"
-                onClick={() => {
-                  deleteTask(params.data.taskid);
-                }}
-              >
-                Delete
-              </MenuItem>
-            </MenuList>
-          </Menu>
+          <div className="flex w-full justify-center items-center gap-2 h-full">
+            <IconButton size="small">
+              <RiEdit2Fill
+                className="text-yellow-700 cursor-pointer"
+                title="Edit"
+                onClick={() => openEditTaskModal(params.data.taskid)}
+              />
+            </IconButton>
+            <IconButton size="small">
+              <RiDeleteBin6Fill
+                title="Delete"
+                className="text-red-500 cursor-pointer"
+                onClick={() => deleteTask(params.data.taskid)}
+              />
+            </IconButton>
+          </div>
         );
       },
     },
   ]);
   const onGridReady = (params) => {
-    params.api.sizeColumnsToFit(); // Adjust column sizes when grid loads
+    params.api.sizeColumnsToFit();
   };
   const defaultColDef = useMemo(() => {
     return {
@@ -323,13 +378,21 @@ const Page = () => {
   return (
     <ProtectedRoute>
       {/* Add task modal */}
-      {
+      {isLoading ? (
+        <Loader />
+      ) : (
         <Dialog
-          open={openAddTaskModal}
+          open={openAddTaskModal || isEdit}
           size="md"
-          handler={handleAddTaskModalOpen}
+          handler={() => {
+            if (isEdit) {
+              setIsEdit(false);
+            } else {
+              handleAddTaskModalOpen(false);
+            }
+          }}
         >
-          <DialogHeader>Add New Task</DialogHeader>
+          <DialogHeader>{isEdit ? "Edit Task" : "Add Task"}</DialogHeader>
           <DialogBody>
             <form className="flex flex-col gap-4">
               <Input
@@ -412,7 +475,9 @@ const Page = () => {
               variant="text"
               color="red"
               size="sm"
-              onClick={() => handleAddTaskModalOpen(false)}
+              onClick={() => {
+                isEdit ? setIsEdit(false) : handleAddTaskModalOpen(false);
+              }}
               className="mr-1"
             >
               <span>Cancel</span>
@@ -421,15 +486,15 @@ const Page = () => {
               variant="gradient"
               type="submit"
               size="sm"
-              onClick={handleSubmit}
+              onClick={isEdit ? editTask : handleSubmit}
             >
-              <span>Add</span>
+              <span>{isEdit ? "Edit" : "Add"}</span>
             </Button>
           </DialogFooter>
         </Dialog>
-      }
+      )}
       <div className="bg-white mx-2 px-4 rounded-lg border border-gray-400">
-        <div className="py-5 w-full flex justify-between">
+        <div className="py-5 w-full sticky top-16 z-50 bg-white px-2 border-b-2 flex justify-between">
           <span className="text-3xl text-black flex items-center">
             <PlaylistAddCheckIcon
               className="text-gray-700 mr-2"
@@ -442,23 +507,24 @@ const Page = () => {
           </Button>
         </div>
         <hr className="mb-5 mx-9" />
-        <div className="mt-5 flex mb-5 w-full">
+        <div
+          className="mt-5 flex mb-5 w-full"
+          style={{ height: "70vh", overflow: "hidden" }} // Fixed height for scrollable rows
+        >
           {/* To-Do Table */}
-          <div
-            className="ag-theme-alpine w-full"
-            style={{ width: "100%", height: "500px" }}
-          >
-            <AgGridReact
-              defaultColDef={defaultColDef}
-              autoSizeStrategy={{
-                type: "fitGridWidth",
-              }}
-              rowDragManaged={true}
-              columnDefs={columns}
-              rowData={rows}
-              onGridReady={onGridReady}
-              domLayout="autoHeight"
-            />
+          <div className="ag-theme-alpine w-full" style={{ height: "100%" }}>
+            {isLoading ? (
+              <Loader />
+            ) : (
+              <AgGridReact
+                defaultColDef={defaultColDef}
+                rowDragManaged={true}
+                columnDefs={columns}
+                rowData={rows}
+                onGridReady={onGridReady}
+                domLayout="normal"
+              />
+            )}
           </div>
         </div>
       </div>

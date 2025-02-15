@@ -13,10 +13,6 @@ const ParticlesComponent = (props) => {
     });
   }, []);
 
-  const particlesLoaded = (container) => {
-    console.log(container);
-  };
-
   const options = useMemo(
     () => ({
       background: {
@@ -91,7 +87,6 @@ const ParticlesComponent = (props) => {
   return (
     <Particles
       id={props.id}
-      init={particlesLoaded}
       options={options}
       className="particles-background"
     />

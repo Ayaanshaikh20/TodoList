@@ -1,17 +1,24 @@
 "use client";
-import React, { createContext, useEffect, useState, useContext } from "react";
+import React, { createContext, useEffect, useState } from "react";
 
 const OverAllContext = createContext();
 
 const ContextProvider = ({ children }) => {
   const [isOpenDashboardSidebar, setIsOpenDashboardSidebar] = useState(false);
+  const [user, setUser] = useState(null);
 
-  const user = JSON.parse(localStorage.getItem("user"));
+  useEffect(() => {
+    const userDetails = JSON.parse(localStorage.getItem("user"));
+    if (userDetails) {
+      setUser(userDetails);
+    }
+  }, []);
 
   return (
     <OverAllContext.Provider
       value={{
         user,
+        setUser,
         isOpenDashboardSidebar,
         setIsOpenDashboardSidebar,
       }}

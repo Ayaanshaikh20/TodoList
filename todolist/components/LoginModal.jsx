@@ -1,5 +1,5 @@
 "use client";
-import React, { use, useContext, useState } from "react";
+import React, { use, useContext, useState, useCallback } from "react";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import axios from "axios";
@@ -11,11 +11,11 @@ import toast from "react-hot-toast";
 import { ContextProvider, OverAllContext } from "../shared/ContextProvider";
 
 const LoginModal = ({ open, handleClose }) => {
+  let { user, setUser } = useContext(OverAllContext);
   const [userDetails, setUserDetails] = useState({
     email: "",
     password: "",
   });
-  let { user } = useContext(OverAllContext);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -33,10 +33,13 @@ const LoginModal = ({ open, handleClose }) => {
       const result = await axios.post("/api/login", userDetails);
       const { message, status, error, data } = result?.data;
       setIsLoading(false);
+
       if (status === 200) {
         handleClose();
         let userDetails = await fetchUserDetails(data.userId);
+        localStorage.setItem("user", JSON.stringify(userDetails));
         setUser(userDetails);
+
         toast.success(message);
         router.push("/dashboard");
       } else {

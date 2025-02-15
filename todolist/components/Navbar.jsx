@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useCallback, useState, useEffect } from "react";
 import { Button } from "@material-tailwind/react";
 import Toolbar from "@mui/material/Toolbar";
 import Box from "@mui/material/Box";
@@ -101,12 +101,21 @@ const NavbarComponent = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isOpenLoginModal, setIsOpenLoginModal] = useState(false);
   const [isOpenRegisterModal, setIsOpenRegisterModal] = useState(false);
-  let { user, isOpenDashboardSidebar, setIsOpenDashboardSidebar } =
-    useContext(OverAllContext);
+  let {
+    user,
+    setUser,
+    handleLogout,
+    isOpenDashboardSidebar,
+    setIsOpenDashboardSidebar,
+  } = useContext(OverAllContext);
   const { data: session } = useSession();
   const router = useRouter();
   const pathname = usePathname();
   const theme = useTheme();
+
+  useEffect(() => {
+    console.log(user, "user");
+  }, []);
 
   const openLoginModal = () => setIsOpenLoginModal(true);
   const closeLoginModal = () => setIsOpenLoginModal(false);
@@ -121,6 +130,7 @@ const NavbarComponent = () => {
   const handleSignOut = (event) => {
     event.preventDefault();
     setUser(null);
+    localStorage.clear();
     toast.success("User logged out successfully");
     router.push("/");
   };

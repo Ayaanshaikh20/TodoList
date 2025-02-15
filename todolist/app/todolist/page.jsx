@@ -66,7 +66,7 @@ const Page = () => {
 
   useEffect(() => {
     getTasksList();
-  }, [user]);
+  }, []);
 
   const handleAddTaskModalOpen = () => {
     setOpenAddTaskModal(!openAddTaskModal);
@@ -101,8 +101,11 @@ const Page = () => {
 
   const getTasksList = async () => {
     try {
-      if (user?.userId) {
-        const result = await axios.get(`/api/get-tasks?userId=${user.userId}`);
+      let userDetails = JSON.parse(localStorage.getItem("user"));
+      if (userDetails.userId) {
+        const result = await axios.get(
+          `/api/get-tasks?userId=${userDetails.userId}`
+        );
         const { status, message } = result.data;
         const { tasklist } = result.data.data;
         if (status == 200 && message == "Tasks retrieved successfully") {
